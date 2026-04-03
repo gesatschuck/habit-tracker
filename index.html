@@ -1510,9 +1510,33 @@
     </div>
     <div class="cycle-log-body">
       <div class="cycle-sublabel">Stimmung</div>
-      <div class="cycle-mood-row" id="cycleMoodRow"></div>
+      <div class="cycle-mood-row" id="cycleMoodRow">
+        <button type="button" class="cycle-mood-btn" id="cmood-super"        onclick="cycleMoodClick('super')">        <span class="mood-emoji">🤩</span><span class="mood-label">Super</span></button>
+        <button type="button" class="cycle-mood-btn" id="cmood-gut"          onclick="cycleMoodClick('gut')">          <span class="mood-emoji">😊</span><span class="mood-label">Gut</span></button>
+        <button type="button" class="cycle-mood-btn" id="cmood-ausgeglichen" onclick="cycleMoodClick('ausgeglichen')"> <span class="mood-emoji">😌</span><span class="mood-label">Okay</span></button>
+        <button type="button" class="cycle-mood-btn" id="cmood-muede"        onclick="cycleMoodClick('muede')">        <span class="mood-emoji">😴</span><span class="mood-label">Müde</span></button>
+        <button type="button" class="cycle-mood-btn" id="cmood-gereizt"      onclick="cycleMoodClick('gereizt')">      <span class="mood-emoji">😤</span><span class="mood-label">Gereizt</span></button>
+        <button type="button" class="cycle-mood-btn" id="cmood-traurig"      onclick="cycleMoodClick('traurig')">      <span class="mood-emoji">😢</span><span class="mood-label">Traurig</span></button>
+        <button type="button" class="cycle-mood-btn" id="cmood-energetisch"  onclick="cycleMoodClick('energetisch')">  <span class="mood-emoji">⚡</span><span class="mood-label">Energetisch</span></button>
+        <button type="button" class="cycle-mood-btn" id="cmood-aengstlich"   onclick="cycleMoodClick('aengstlich')">   <span class="mood-emoji">😰</span><span class="mood-label">Ängstlich</span></button>
+      </div>
       <div class="cycle-sublabel">Symptome &amp; Körper</div>
-      <div class="cycle-chips" id="cycleChips"></div>
+      <div class="cycle-chips" id="cycleChips">
+        <button type="button" class="cycle-chip" id="cchip-starke_blutung"  onclick="cycleChipClick('starke_blutung')"> <span class="chip-emoji">🩸</span>Stärkere Blutung</button>
+        <button type="button" class="cycle-chip" id="cchip-wenig_blutung"   onclick="cycleChipClick('wenig_blutung')">  <span class="chip-emoji">🩸</span>Weniger Blutung</button>
+        <button type="button" class="cycle-chip" id="cchip-brustschmerzen"  onclick="cycleChipClick('brustschmerzen')"> <span class="chip-emoji">🫀</span>Brustschmerzen</button>
+        <button type="button" class="cycle-chip" id="cchip-kraempfe"        onclick="cycleChipClick('kraempfe')">       <span class="chip-emoji">🤕</span>Krämpfe</button>
+        <button type="button" class="cycle-chip" id="cchip-kopfschmerzen"   onclick="cycleChipClick('kopfschmerzen')">  <span class="chip-emoji">🤯</span>Kopfschmerzen</button>
+        <button type="button" class="cycle-chip" id="cchip-blaehungen"      onclick="cycleChipClick('blaehungen')">     <span class="chip-emoji">💨</span>Blähungen</button>
+        <button type="button" class="cycle-chip" id="cchip-heisshunger"     onclick="cycleChipClick('heisshunger')">    <span class="chip-emoji">🍫</span>Heißhunger</button>
+        <button type="button" class="cycle-chip" id="cchip-mehr_hunger"     onclick="cycleChipClick('mehr_hunger')">    <span class="chip-emoji">🍽️</span>Mehr Hunger / wenig Sättigung</button>
+        <button type="button" class="cycle-chip" id="cchip-energielos"      onclick="cycleChipClick('energielos')">     <span class="chip-emoji">🔋</span>Energielos</button>
+        <button type="button" class="cycle-chip" id="cchip-energie"         onclick="cycleChipClick('energie')">        <span class="chip-emoji">✨</span>Voller Energie</button>
+        <button type="button" class="cycle-chip" id="cchip-schlafprobleme"  onclick="cycleChipClick('schlafprobleme')"> <span class="chip-emoji">🛌</span>Schlafprobleme</button>
+        <button type="button" class="cycle-chip" id="cchip-hautprobleme"    onclick="cycleChipClick('hautprobleme')">   <span class="chip-emoji">😶</span>Hautprobleme</button>
+        <button type="button" class="cycle-chip" id="cchip-schwindel"       onclick="cycleChipClick('schwindel')">      <span class="chip-emoji">💫</span>Schwindel</button>
+        <button type="button" class="cycle-chip" id="cchip-hitze"           onclick="cycleChipClick('hitze')">          <span class="chip-emoji">🥵</span>Hitze / Wärme</button>
+      </div>
       <div class="cycle-sublabel">Wie geht's dir? Was nimmst du wahr?</div>
       <textarea class="cycle-note-input" id="cycleNoteInput" placeholder="Gedanken, Gefühle, körperliche Wahrnehmungen — alles was du festhalten möchtest…"></textarea>
       <div class="cycle-log-footer">
@@ -2527,31 +2551,22 @@
   }
 
   function renderCycleLogForm() {
-    const moodRow = document.getElementById('cycleMoodRow');
-    if (!moodRow) return;
-    const chips = document.getElementById('cycleChips');
-    if (!chips) return;
-
     const log = loadCycleLog();
     const entry = log[cycleLogDate] || { mood: null, symptoms: [], note: '' };
 
-    // ── Mood buttons via innerHTML ──
-    moodRow.innerHTML = CYCLE_MOODS.map(function(m) {
-      var cls = 'cycle-mood-btn' + (entry.mood === m.key ? ' active' : '');
-      return '<button type="button" class="' + cls + '" onclick="cycleMoodClick(\'' + m.key + '\')">'
-        + '<span class="mood-emoji">' + m.emoji + '</span>'
-        + '<span class="mood-label">' + m.label + '</span>'
-        + '</button>';
-    }).join('');
+    // ── Update mood button active states ──
+    CYCLE_MOODS.forEach(function(m) {
+      var btn = document.getElementById('cmood-' + m.key);
+      if (btn) btn.className = 'cycle-mood-btn' + (entry.mood === m.key ? ' active' : '');
+    });
 
-    // ── Chip buttons via innerHTML ──
-    chips.innerHTML = CYCLE_SYMPTOMS.map(function(s) {
+    // ── Update chip active states ──
+    CYCLE_SYMPTOMS.forEach(function(s) {
+      var btn = document.getElementById('cchip-' + s.key);
+      if (!btn) return;
       var active = (entry.symptoms || []).indexOf(s.key) > -1;
-      var cls = 'cycle-chip' + (active ? ' active' + (s.period ? ' period-chip' : '') : '');
-      return '<button type="button" class="' + cls + '" onclick="cycleChipClick(\'' + s.key + '\')">'
-        + '<span class="chip-emoji">' + s.emoji + '</span>' + s.label
-        + '</button>';
-    }).join('');
+      btn.className = 'cycle-chip' + (active ? ' active' + (s.period ? ' period-chip' : '') : '');
+    });
 
     // ── Note ──
     var noteEl = document.getElementById('cycleNoteInput');
