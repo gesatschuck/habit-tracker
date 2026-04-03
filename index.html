@@ -2029,7 +2029,7 @@
     });
     if (v === 'stats')  renderStats();
     if (v === 'backlog') renderBacklog();
-    if (v === 'cycle')  renderCycle();
+    if (v === 'cycle')  { renderCycle(); renderCycleLogForm(); }
   }
 
   // ── Zyklus ────────────────────────────────────────────────
@@ -2506,53 +2506,56 @@
     picker.showPicker?.() || picker.click();
   }
 
+  function cycleMoodClick(key) {
+    const l = loadCycleLog();
+    if (!l[cycleLogDate]) l[cycleLogDate] = { mood: null, symptoms: [], note: '' };
+    l[cycleLogDate].mood = l[cycleLogDate].mood === key ? null : key;
+    saveCycleLog(l);
+    renderCycleLogForm();
+  }
+
+  function cycleChipClick(key) {
+    const l = loadCycleLog();
+    if (!l[cycleLogDate]) l[cycleLogDate] = { mood: null, symptoms: [], note: '' };
+    const syms = l[cycleLogDate].symptoms || [];
+    l[cycleLogDate].symptoms = syms;
+    const idx = syms.indexOf(key);
+    if (idx > -1) syms.splice(idx, 1); else syms.push(key);
+    saveCycleLog(l);
+    renderCycleLogForm();
+    renderCycleJournal();
+  }
+
   function renderCycleLogForm() {
-    const log = loadCycleLog();
-    const entry = log[cycleLogDate] || { mood: null, symptoms: [], note: '' };
     const moodRow = document.getElementById('cycleMoodRow');
     if (!moodRow) return;
-
-    // ── Mood ──
-    moodRow.innerHTML = '';
-    CYCLE_MOODS.forEach(m => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'cycle-mood-btn' + (entry.mood === m.key ? ' active' : '');
-      btn.innerHTML = `<span class="mood-emoji">${m.emoji}</span><span class="mood-label">${m.label}</span>`;
-      btn.onclick = () => {
-        const l = loadCycleLog();
-        if (!l[cycleLogDate]) l[cycleLogDate] = { mood: null, symptoms: [], note: '' };
-        l[cycleLogDate].mood = l[cycleLogDate].mood === m.key ? null : m.key;
-        saveCycleLog(l);
-        renderCycleLogForm();
-      };
-      moodRow.appendChild(btn);
-    });
-
-    // ── Symptoms ──
     const chips = document.getElementById('cycleChips');
-    chips.innerHTML = '';
-    CYCLE_SYMPTOMS.forEach(s => {
-      const active = (entry.symptoms || []).includes(s.key);
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'cycle-chip' + (active ? ' active' + (s.period ? ' period-chip' : '') : '');
-      btn.innerHTML = `<span class="chip-emoji">${s.emoji}</span>${s.label}`;
-      btn.onclick = () => {
-        const l = loadCycleLog();
-        if (!l[cycleLogDate]) l[cycleLogDate] = { mood: null, symptoms: [], note: '' };
-        const syms = l[cycleLogDate].symptoms;
-        const idx = syms.indexOf(s.key);
-        if (idx > -1) syms.splice(idx, 1); else syms.push(s.key);
-        saveCycleLog(l);
-        renderCycleLogForm();
-        renderCycleJournal();
-      };
-      chips.appendChild(btn);
-    });
+    if (!chips) return;
+
+    const log = loadCycleLog();
+    const entry = log[cycleLogDate] || { mood: null, symptoms: [], note: '' };
+
+    // ── Mood buttons via innerHTML ──
+    moodRow.innerHTML = CYCLE_MOODS.map(function(m) {
+      var cls = 'cycle-mood-btn' + (entry.mood === m.key ? ' active' : '');
+      return '<button type="button" class="' + cls + '" onclick="cycleMoodClick(\'' + m.key + '\')">'
+        + '<span class="mood-emoji">' + m.emoji + '</span>'
+        + '<span class="mood-label">' + m.label + '</span>'
+        + '</button>';
+    }).join('');
+
+    // ── Chip buttons via innerHTML ──
+    chips.innerHTML = CYCLE_SYMPTOMS.map(function(s) {
+      var active = (entry.symptoms || []).indexOf(s.key) > -1;
+      var cls = 'cycle-chip' + (active ? ' active' + (s.period ? ' period-chip' : '') : '');
+      return '<button type="button" class="' + cls + '" onclick="cycleChipClick(\'' + s.key + '\')">'
+        + '<span class="chip-emoji">' + s.emoji + '</span>' + s.label
+        + '</button>';
+    }).join('');
 
     // ── Note ──
-    document.getElementById('cycleNoteInput').value = entry.note || '';
+    var noteEl = document.getElementById('cycleNoteInput');
+    if (noteEl) noteEl.value = entry.note || '';
     updateCycleLogDateNav();
     renderCycleJournal();
   }
