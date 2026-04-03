@@ -678,8 +678,11 @@
     }
     .cycle-mood-row { display: flex; gap: 6px; flex-wrap: wrap; }
     .cycle-mood-btn {
+      display: -webkit-flex;
       display: flex;
+      -webkit-flex-direction: column;
       flex-direction: column;
+      -webkit-align-items: center;
       align-items: center;
       gap: 3px;
       padding: 8px 10px;
@@ -690,6 +693,8 @@
       transition: all 0.15s;
       font-family: inherit;
       min-width: 58px;
+      -webkit-appearance: none;
+      appearance: none;
     }
     .cycle-mood-btn .mood-emoji { font-size: 1.35rem; line-height: 1; }
     .cycle-mood-btn .mood-label { font-size: 0.62rem; color: var(--text-muted); font-weight: 500; }
@@ -698,10 +703,14 @@
     .cycle-mood-btn.active .mood-label { color: var(--accent); }
     .cycle-chips { display: flex; flex-wrap: wrap; gap: 7px; }
     .cycle-chip {
+      display: -webkit-flex;
       display: flex;
+      -webkit-align-items: center;
       align-items: center;
       gap: 5px;
       padding: 6px 12px;
+      -webkit-appearance: none;
+      appearance: none;
       border-radius: 99px;
       border: 1.5px solid var(--border);
       background: none;
@@ -2507,6 +2516,7 @@
     moodRow.innerHTML = '';
     CYCLE_MOODS.forEach(m => {
       const btn = document.createElement('button');
+      btn.type = 'button';
       btn.className = 'cycle-mood-btn' + (entry.mood === m.key ? ' active' : '');
       btn.innerHTML = `<span class="mood-emoji">${m.emoji}</span><span class="mood-label">${m.label}</span>`;
       btn.onclick = () => {
@@ -2525,6 +2535,7 @@
     CYCLE_SYMPTOMS.forEach(s => {
       const active = (entry.symptoms || []).includes(s.key);
       const btn = document.createElement('button');
+      btn.type = 'button';
       btn.className = 'cycle-chip' + (active ? ' active' + (s.period ? ' period-chip' : '') : '');
       btn.innerHTML = `<span class="chip-emoji">${s.emoji}</span>${s.label}`;
       btn.onclick = () => {
