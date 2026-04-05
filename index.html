@@ -760,6 +760,30 @@
     .cycle-mood-btn:hover { background: var(--surface2); border-color: var(--border); }
     .cycle-mood-btn.active { background: var(--accent-light); border-color: var(--accent); }
     .cycle-mood-btn.active .mood-label { color: var(--accent); }
+    .ibu-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .ibu-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+    .ibu-input {
+      width: 72px;
+      padding: 5px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      background: none;
+      font-family: inherit;
+      font-size: 0.82rem;
+      color: var(--text);
+      text-align: center;
+      outline: none;
+      -moz-appearance: textfield;
+    }
+    .ibu-input::-webkit-inner-spin-button,
+    .ibu-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .ibu-input:focus { border-color: var(--accent); }
+    .ibu-unit { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
     .cycle-chip-groups { display: flex; flex-direction: column; gap: 10px; }
     .chip-group { display: flex; flex-direction: column; gap: 6px; }
     .chip-group-label {
@@ -1663,6 +1687,11 @@
             <button type="button" class="cycle-chip" id="cchip-kraempfe"       onclick="cycleChipClick('kraempfe')">      <span class="chip-emoji">🤕</span>Krämpfe</button>
             <button type="button" class="cycle-chip" id="cchip-brustschmerzen" onclick="cycleChipClick('brustschmerzen')"><span class="chip-emoji">🫀</span>Brustschmerzen</button>
             <button type="button" class="cycle-chip" id="cchip-kopfschmerzen"  onclick="cycleChipClick('kopfschmerzen')"> <span class="chip-emoji">🤯</span>Kopfschmerzen</button>
+          </div>
+          <div class="ibu-row">
+            <span class="ibu-label">💊 Ibuprofen</span>
+            <input type="number" class="ibu-input" id="ibuInput" min="0" max="3200" step="200" placeholder="0" />
+            <span class="ibu-unit">mg</span>
           </div>
         </div>
 
@@ -2777,17 +2806,22 @@
     // ── Note ──
     var noteEl = document.getElementById('cycleNoteInput');
     if (noteEl) noteEl.value = entry.note || '';
+    // ── Ibu ──
+    var ibuEl = document.getElementById('ibuInput');
+    if (ibuEl) ibuEl.value = entry.ibu || '';
     updateCycleLogDateNav();
     renderCycleJournal();
   }
 
   function saveCycleLogEntry() {
     const note = document.getElementById('cycleNoteInput').value.trim();
+    const ibu = parseInt(document.getElementById('ibuInput').value) || 0;
     const log = loadCycleLog();
     if (!log[cycleLogDate]) log[cycleLogDate] = { mood: null, symptoms: [], note: '' };
     log[cycleLogDate].note = note;
+    log[cycleLogDate].ibu = ibu || null;
     const e = log[cycleLogDate];
-    if (!e.mood && !(e.symptoms || []).length && !e.note) delete log[cycleLogDate];
+    if (!e.mood && !(e.symptoms || []).length && !e.note && !e.ibu) delete log[cycleLogDate];
     saveCycleLog(log);
     renderCycleJournal();
     const btn = document.querySelector('.cycle-log-footer .cycle-save-btn');
@@ -2873,6 +2907,7 @@
         });
         html += `</div>`;
       }
+      if (entry.ibu) html += `<div class="cycle-journal-note">💊 ${entry.ibu} mg Ibuprofen</div>`;
       if (entry.note) html += `<div class="cycle-journal-note">${escHtml(entry.note)}</div>`;
       html += `</div>`;
       html += `<button class="cycle-journal-edit" onclick="editCycleLogEntry(event,'${date}')" title="Bearbeiten">✏️</button>`;
