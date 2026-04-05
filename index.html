@@ -1630,11 +1630,13 @@
         <button type="button" class="cycle-chip" id="cchip-hautprobleme"    onclick="cycleChipClick('hautprobleme')">   <span class="chip-emoji">😶</span>Hautprobleme</button>
         <button type="button" class="cycle-chip" id="cchip-schwindel"       onclick="cycleChipClick('schwindel')">      <span class="chip-emoji">💫</span>Schwindel</button>
         <button type="button" class="cycle-chip" id="cchip-hitze"           onclick="cycleChipClick('hitze')">          <span class="chip-emoji">🥵</span>Hitze / Wärme</button>
+        <button type="button" class="cycle-chip" id="cchip-unterleib"       onclick="cycleChipClick('unterleib')">      <span class="chip-emoji">🫃</span>Unterleibsschmerzen</button>
+        <button type="button" class="cycle-chip" id="cchip-durchfall"       onclick="cycleChipClick('durchfall')">      <span class="chip-emoji">🚽</span>Durchfall</button>
       </div>
       <div class="cycle-sublabel">Wie geht's dir? Was nimmst du wahr?</div>
       <textarea class="cycle-note-input" id="cycleNoteInput" placeholder="Gedanken, Gefühle, körperliche Wahrnehmungen — alles was du festhalten möchtest…"></textarea>
       <div class="cycle-log-footer">
-        <button class="cycle-period-start-btn" onclick="setPeriodStartToday()">🩸 Neue Periode beginnt heute</button>
+        <button class="cycle-period-start-btn" id="periodStartBtn" onclick="setPeriodStartDate()">🩸 Neue Periode beginnt heute</button>
         <button class="cycle-save-btn" onclick="saveCycleLogEntry()">Speichern</button>
       </div>
     </div>
@@ -2637,7 +2639,9 @@
     { key: 'schlafprobleme', emoji: '🛌', label: 'Schlafprobleme', period: false },
     { key: 'hautprobleme',   emoji: '😶', label: 'Hautprobleme',   period: false },
     { key: 'schwindel',      emoji: '💫', label: 'Schwindel',      period: false },
-    { key: 'hitze',          emoji: '🥵', label: 'Hitze / Wärme',  period: false },
+    { key: 'hitze',          emoji: '🥵', label: 'Hitze / Wärme',       period: false },
+    { key: 'unterleib',      emoji: '🫃', label: 'Unterleibsschmerzen', period: false },
+    { key: 'durchfall',      emoji: '🚽', label: 'Durchfall',           period: false },
   ];
 
   let cycleLogDate = TODAY_KEY();
@@ -2663,6 +2667,16 @@
     } else {
       pickBtn.textContent = '📅';
       pickBtn.classList.remove('active');
+    }
+    // update period-start button label
+    const pBtn = document.getElementById('periodStartBtn');
+    if (pBtn) {
+      if (cycleLogDate === today) {
+        pBtn.textContent = '🩸 Neue Periode beginnt heute';
+      } else {
+        const d = new Date(cycleLogDate + 'T12:00:00');
+        pBtn.textContent = '🩸 Periode begann am ' + d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' });
+      }
     }
   }
 
@@ -2731,20 +2745,25 @@
     if (btn) { btn.textContent = '✓ Gespeichert'; setTimeout(() => btn.textContent = 'Speichern', 1600); }
   }
 
-  function setPeriodStartToday() {
-    if (!confirm('Heute als Beginn deiner neuen Periode speichern?')) return;
+  function setPeriodStartDate() {
+    const date = cycleLogDate;
     const today = TODAY_KEY();
+    const label = date === today ? 'heute' : new Date(date + 'T12:00:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'long' });
+    if (!confirm('Periode-Beginn auf ' + label + ' setzen?')) return;
     const data = loadCycleData() || { cycleLength: 28, periodLen: 5 };
-    data.lastPeriod = today;
+    data.lastPeriod = date;
     saveCycleData(data);
     const log = loadCycleLog();
-    if (!log[today]) log[today] = { mood: null, symptoms: [], note: '' };
-    if (!log[today].symptoms.includes('starke_blutung') && !log[today].symptoms.includes('wenig_blutung')) log[today].symptoms.push('starke_blutung');
+    if (!log[date]) log[date] = { mood: null, symptoms: [], note: '' };
+    if (!log[date].symptoms.includes('starke_blutung') && !log[date].symptoms.includes('wenig_blutung')) log[date].symptoms.push('starke_blutung');
     saveCycleLog(log);
     const lp = document.getElementById('cycleLastPeriod');
-    if (lp) lp.value = today;
+    if (lp) lp.value = date;
     renderCycle();
   }
+
+  // keep old name working just in case
+  function setPeriodStartToday() { setPeriodStartDate(); }
 
   function renderCycleJournal() {
     const log = loadCycleLog();
