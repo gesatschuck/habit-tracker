@@ -882,8 +882,25 @@
       flex-shrink: 0;
       align-self: flex-start;
     }
+    .cycle-journal-entry { cursor: pointer; }
+    .cycle-journal-entry:hover { background: var(--surface2); }
     .cycle-journal-entry:hover .cycle-journal-delete { opacity: 1; }
+    .cycle-journal-entry:hover .cycle-journal-edit { opacity: 1; }
     .cycle-journal-delete:hover { color: var(--text); }
+    .cycle-journal-edit {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      cursor: pointer;
+      padding: 2px 5px;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity 0.1s;
+      flex-shrink: 0;
+      align-self: flex-start;
+    }
+    .cycle-journal-edit:hover { color: var(--accent); }
 
     /* ── Cycle Analytics ── */
     .cycle-analytics-subheader {
@@ -2826,8 +2843,13 @@
       }
       if (entry.note) html += `<div class="cycle-journal-note">${escHtml(entry.note)}</div>`;
       html += `</div>`;
+      html += `<button class="cycle-journal-edit" onclick="editCycleLogEntry(event,'${date}')" title="Bearbeiten">✏️</button>`;
       html += `<button class="cycle-journal-delete" onclick="deleteCycleLogEntry(event,'${date}')">✕</button>`;
       row.innerHTML = html;
+      row.addEventListener('click', function(e) {
+        if (e.target.closest('.cycle-journal-delete') || e.target.closest('.cycle-journal-edit')) return;
+        editCycleLogEntry(e, date);
+      });
       journal.appendChild(row);
     });
   }
@@ -2839,6 +2861,13 @@
     saveCycleLog(log);
     renderCycleJournal();
     if (cycleLogDate === date) renderCycleLogForm();
+  }
+
+  function editCycleLogEntry(e, date) {
+    e.stopPropagation();
+    setCycleLogDate(date);
+    const card = document.querySelector('.cycle-log-card');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   // ── Cycle Analytics ──────────────────────────────────────
