@@ -837,9 +837,14 @@
     .cycle-log-footer {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
       gap: 10px;
-      flex-wrap: wrap;
+    }
+    .cycle-autosave-hint {
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 500;
+      min-height: 1em;
     }
     .cycle-period-start-btn {
       display: inline-flex;
@@ -1684,9 +1689,7 @@
           <div class="chip-group-label">🤕 Schmerzen</div>
           <div class="cycle-chips">
             <button type="button" class="cycle-chip" id="cchip-unterleib"      onclick="cycleChipClick('unterleib')">     <span class="chip-emoji">🫃</span>Unterleibsschmerzen</button>
-            <button type="button" class="cycle-chip" id="cchip-kraempfe"       onclick="cycleChipClick('kraempfe')">      <span class="chip-emoji">🤕</span>Krämpfe</button>
             <button type="button" class="cycle-chip" id="cchip-brustschmerzen" onclick="cycleChipClick('brustschmerzen')"><span class="chip-emoji">🫀</span>Brustschmerzen</button>
-            <button type="button" class="cycle-chip" id="cchip-kopfschmerzen"  onclick="cycleChipClick('kopfschmerzen')"> <span class="chip-emoji">🤯</span>Kopfschmerzen</button>
           </div>
           <div class="ibu-row">
             <span class="ibu-label">💊 Ibuprofen</span>
@@ -1718,7 +1721,7 @@
       <div class="cycle-sublabel">Wie geht's dir? Was nimmst du wahr?</div>
       <textarea class="cycle-note-input" id="cycleNoteInput" placeholder="Gedanken, Gefühle, körperliche Wahrnehmungen — alles was du festhalten möchtest…"></textarea>
       <div class="cycle-log-footer">
-        <button class="cycle-save-btn" onclick="saveCycleLogEntry()">Speichern</button>
+        <span class="cycle-autosave-hint" id="cycleAutosaveHint"></span>
       </div>
     </div>
   </div>
@@ -2710,8 +2713,6 @@
     { key: 'starke_blutung', emoji: '🩸', label: 'Stärkere Blutung', period: true  },
     { key: 'wenig_blutung',  emoji: '🩸', label: 'Weniger Blutung',  period: true  },
     { key: 'brustschmerzen', emoji: '🫀', label: 'Brustschmerzen', period: false },
-    { key: 'kraempfe',       emoji: '🤕', label: 'Krämpfe',        period: false },
-    { key: 'kopfschmerzen',  emoji: '🤯', label: 'Kopfschmerzen',  period: false },
     { key: 'heisshunger',    emoji: '🍫', label: 'Heißhunger',           period: false },
     { key: 'mehr_hunger',    emoji: '🍽️', label: 'Mehr Hunger / wenig Sättigung', period: false },
     { key: 'energielos',     emoji: '🔋', label: 'Energielos',     period: false },
@@ -2813,6 +2814,8 @@
     renderCycleJournal();
   }
 
+  var cycleAutosaveTimer = null;
+
   function saveCycleLogEntry() {
     const note = document.getElementById('cycleNoteInput').value.trim();
     const ibu = parseInt(document.getElementById('ibuInput').value) || 0;
@@ -2824,9 +2827,22 @@
     if (!e.mood && !(e.symptoms || []).length && !e.note && !e.ibu) delete log[cycleLogDate];
     saveCycleLog(log);
     renderCycleJournal();
-    const btn = document.querySelector('.cycle-log-footer .cycle-save-btn');
-    if (btn) { btn.textContent = '✓ Gespeichert'; setTimeout(() => btn.textContent = 'Speichern', 1600); }
+    const hint = document.getElementById('cycleAutosaveHint');
+    if (hint) {
+      hint.textContent = '✓ Gespeichert';
+      setTimeout(function() { hint.textContent = ''; }, 1800);
+    }
   }
+
+  function cycleAutosave() {
+    clearTimeout(cycleAutosaveTimer);
+    const hint = document.getElementById('cycleAutosaveHint');
+    if (hint) hint.textContent = '…';
+    cycleAutosaveTimer = setTimeout(function() { saveCycleLogEntry(); }, 600);
+  }
+
+  document.getElementById('cycleNoteInput').addEventListener('input', cycleAutosave);
+  document.getElementById('ibuInput').addEventListener('input', cycleAutosave);
 
   function setPeriodStartDate() {
     const date = cycleLogDate;
