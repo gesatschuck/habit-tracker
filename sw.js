@@ -1,4 +1,4 @@
-const CACHE = 'habit-tracker-v8';
+const CACHE = 'habit-tracker-v9';
 const ASSETS = [
   './',
   './index.html',
@@ -7,15 +7,11 @@ const ASSETS = [
   './icon-maskable.svg'
 ];
 
-// Install: cache all assets
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS))
-  );
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
   self.skipWaiting();
 });
 
-// Activate: clear old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -25,9 +21,6 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// Fetch: cache-first, fall back to network
 self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
-  );
+  e.respondWith(caches.match(e.request).then(cached => cached || fetch(e.request)));
 });

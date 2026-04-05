@@ -3038,10 +3038,18 @@
 
   function loadCalUrls() {
     const stored = localStorage.getItem('ht_cal_urls');
-    if (stored) return JSON.parse(stored);
-    // migrate old single URL
-    const old = localStorage.getItem('ht_cal_url');
-    if (old) return [old];
+    if (stored) {
+      const arr = JSON.parse(stored);
+      // ensure both default URLs are always included
+      let changed = false;
+      DEFAULT_CAL_URLS.forEach(function(u) {
+        if (!arr.includes(u)) { arr.push(u); changed = true; }
+      });
+      if (changed) saveCalUrls(arr);
+      return arr;
+    }
+    // first load: start with defaults, ignore old single-URL key
+    saveCalUrls(DEFAULT_CAL_URLS.slice());
     return DEFAULT_CAL_URLS.slice();
   }
 
