@@ -425,12 +425,71 @@
       padding: 4px 8px;
       font-size: 0.85rem;
     }
-    .todo-date-input {
+    .todo-date-input { display: none; }
+    .todo-date-nav { position: relative; }
+    .todo-cal-popup {
       position: absolute;
-      opacity: 0;
-      width: 1px;
-      height: 1px;
+      top: calc(100% + 6px);
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+      padding: 12px;
+      z-index: 300;
+      width: 242px;
+      -webkit-user-select: none;
+      user-select: none;
     }
+    .tcal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .tcal-nav-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.05rem;
+      line-height: 1;
+      padding: 3px 10px 4px;
+      color: var(--text);
+      font-family: inherit;
+    }
+    .tcal-nav-btn:hover { background: var(--surface2); }
+    .tcal-month-label { font-size: 0.83rem; font-weight: 500; color: var(--text); }
+    .tcal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+    .tcal-dow {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      text-align: center;
+      font-weight: 500;
+      padding: 2px 0 5px;
+    }
+    .tcal-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.76rem;
+      border-radius: 7px;
+      cursor: pointer;
+      color: var(--text);
+      border: none;
+      background: none;
+      font-family: inherit;
+      padding: 0;
+    }
+    .tcal-day:hover { background: var(--surface2); }
+    .tcal-today { color: var(--accent); font-weight: 700; }
+    .tcal-selected { background: var(--accent) !important; color: white !important; border-radius: 7px; }
+    .tcal-empty { pointer-events: none; }
     .todo-list {
       list-style: none;
       padding: 6px 0;
@@ -1364,7 +1423,7 @@
         <span id="todoCustomLabel" style="display:none"></span>
         <span id="todoCalIcon">📅</span>
       </button>
-      <input type="date" class="todo-date-input" id="todoDatePicker" onchange="todoPickDate(this.value)" />
+      <div class="todo-cal-popup" id="todoCalPopup" style="display:none"></div>
     </div>
   </div>
   <ul class="todo-list" id="todoList"></ul>
@@ -2006,14 +2065,63 @@
     renderTodos();
   }
 
+  var tcalYear = new Date().getFullYear();
+  var tcalMonth = new Date().getMonth();
+
   function openTodoPicker() {
-    const picker = document.getElementById('todoDatePicker');
-    picker.value = todoDate;
-    picker.showPicker?.() || picker.click();
+    var popup = document.getElementById('todoCalPopup');
+    if (popup.style.display !== 'none') { popup.style.display = 'none'; return; }
+    var d = new Date(todoDate + 'T12:00:00');
+    tcalYear = d.getFullYear();
+    tcalMonth = d.getMonth();
+    tcalRender();
+    popup.style.display = 'block';
+    setTimeout(function() { document.addEventListener('click', tcalOutside, { once: true }); }, 10);
   }
 
-  function todoPickDate(val) {
-    if (val) { todoDate = val; renderTodos(); }
+  function tcalOutside(e) {
+    var popup = document.getElementById('todoCalPopup');
+    if (!popup) return;
+    if (!popup.contains(e.target)) {
+      popup.style.display = 'none';
+    } else {
+      setTimeout(function() { document.addEventListener('click', tcalOutside, { once: true }); }, 10);
+    }
+  }
+
+  function tcalPrev() { tcalMonth--; if (tcalMonth < 0) { tcalMonth = 11; tcalYear--; } tcalRender(); }
+  function tcalNext() { tcalMonth++; if (tcalMonth > 11) { tcalMonth = 0; tcalYear++; } tcalRender(); }
+
+  function tcalRender() {
+    var popup = document.getElementById('todoCalPopup');
+    var today = TODAY_KEY();
+    var MONTHS = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    var firstDow = new Date(tcalYear, tcalMonth, 1).getDay();
+    var offset = (firstDow + 6) % 7;
+    var daysInMonth = new Date(tcalYear, tcalMonth + 1, 0).getDate();
+    var html = '<div class="tcal-nav">'
+      + '<button type="button" class="tcal-nav-btn" onclick="tcalPrev()">‹</button>'
+      + '<span class="tcal-month-label">' + MONTHS[tcalMonth] + ' ' + tcalYear + '</span>'
+      + '<button type="button" class="tcal-nav-btn" onclick="tcalNext()">›</button>'
+      + '</div><div class="tcal-grid">'
+      + ['Mo','Di','Mi','Do','Fr','Sa','So'].map(function(x){ return '<div class="tcal-dow">' + x + '</div>'; }).join('');
+    for (var i = 0; i < offset; i++) html += '<div class="tcal-day tcal-empty"></div>';
+    for (var day = 1; day <= daysInMonth; day++) {
+      var mm = String(tcalMonth + 1).padStart(2,'0');
+      var dd = String(day).padStart(2,'0');
+      var ds = tcalYear + '-' + mm + '-' + dd;
+      var cls = 'tcal-day';
+      if (ds === today) cls += ' tcal-today';
+      if (ds === todoDate) cls += ' tcal-selected';
+      html += '<button type="button" class="' + cls + '" onclick="tcalPick(\'' + ds + '\')">' + day + '</button>';
+    }
+    popup.innerHTML = html + '</div>';
+  }
+
+  function tcalPick(dateStr) {
+    todoDate = dateStr;
+    renderTodos();
+    document.getElementById('todoCalPopup').style.display = 'none';
   }
 
   document.getElementById('todoInput').addEventListener('keydown', e => {
