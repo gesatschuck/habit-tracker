@@ -1448,6 +1448,160 @@
     }
     .cal-save-btn:hover { filter: brightness(0.95); }
 
+    /* ── Thoughts page ── */
+    .thoughts-page {
+      max-width: 600px;
+      margin: 0 auto;
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .thought-compose {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .thought-compose-top {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .thought-mood-select, .thought-tag-select {
+      flex: 1;
+      min-width: 120px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      padding: 7px 14px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .thought-mood-select:focus, .thought-tag-select:focus { border-color: var(--accent); }
+    .thought-textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: vertical;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.55;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .thought-textarea:focus { border-color: var(--accent); }
+    .thought-compose-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .thought-autosave { font-size: 0.72rem; color: var(--accent); font-weight: 500; }
+    .thought-save-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 99px;
+      padding: 8px 18px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: filter 0.15s;
+    }
+    .thought-save-btn:hover { filter: brightness(1.1); }
+    .thought-search-row { display: flex; }
+    .thought-search {
+      flex: 1;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      padding: 9px 18px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      color: var(--text);
+      outline: none;
+      box-shadow: var(--shadow);
+    }
+    .thought-search:focus { border-color: var(--accent); }
+    .thought-entry {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .thought-entry:hover { background: var(--surface2); }
+    .thought-entry-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .thought-entry-mood { font-size: 1.15rem; line-height: 1; flex-shrink: 0; }
+    .thought-entry-meta {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 1px;
+    }
+    .thought-entry-date { font-size: 0.7rem; color: var(--text-muted); font-weight: 300; }
+    .thought-entry-tag {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-light);
+      border-radius: 99px;
+      padding: 1px 8px;
+      width: fit-content;
+    }
+    .thought-entry-text {
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.55;
+      font-weight: 300;
+      white-space: pre-wrap;
+    }
+    .thought-entry-delete {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity 0.1s;
+      flex-shrink: 0;
+      align-self: flex-start;
+    }
+    .thought-entry:hover .thought-entry-delete { opacity: 1; }
+    .thought-entry-delete:hover { color: #c0392b; }
+    .thought-empty {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 300;
+      padding: 32px 0;
+    }
+
     /* scrollbar */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -1457,9 +1611,10 @@
 <body>
 
 <nav class="app-nav">
-  <button class="nav-btn active" id="nav-today"   onclick="switchView('today')">Heute</button>
+  <button class="nav-btn active" id="nav-today"    onclick="switchView('today')">Heute</button>
   <button class="nav-btn"        id="nav-backlog"  onclick="switchView('backlog')">Backlog</button>
   <button class="nav-btn"        id="nav-cycle"    onclick="switchView('cycle')">Zyklus</button>
+  <button class="nav-btn"        id="nav-thoughts" onclick="switchView('thoughts')">Thoughts</button>
   <button class="nav-btn"        id="nav-stats"    onclick="switchView('stats')">Auswertung</button>
 </nav>
 
@@ -1780,6 +1935,54 @@
   </div>
 
 </div><!-- /cycleView -->
+
+<!-- ── Thoughts page ── -->
+<div class="thoughts-page" id="thoughtsView">
+
+  <!-- New entry -->
+  <div class="thought-compose">
+    <div class="thought-compose-top">
+      <select class="thought-mood-select" id="thoughtMood">
+        <option value="">Stimmung…</option>
+        <option value="😌">😌 Ruhig</option>
+        <option value="🙂">🙂 Okay</option>
+        <option value="😔">😔 Traurig</option>
+        <option value="😤">😤 Frustriert</option>
+        <option value="😰">😰 Ängstlich</option>
+        <option value="😡">😡 Wütend</option>
+        <option value="🥲">🥲 Überwältigt</option>
+        <option value="💪">💪 Stark</option>
+        <option value="🤍">🤍 Dankbar</option>
+      </select>
+      <select class="thought-tag-select" id="thoughtTag">
+        <option value="">Thema…</option>
+        <option value="Zweifel">Zweifel</option>
+        <option value="Angst">Angst</option>
+        <option value="Beziehung">Beziehung</option>
+        <option value="Arbeit">Arbeit</option>
+        <option value="Körper">Körper</option>
+        <option value="Familie">Familie</option>
+        <option value="Therapie">Therapie</option>
+        <option value="Erfolg">Erfolg</option>
+        <option value="Erkenntnis">Erkenntnis ✨</option>
+      </select>
+    </div>
+    <textarea class="thought-textarea" id="thoughtText" placeholder="Was geht dir gerade durch den Kopf?&#10;Kein Urteil, kein Filter — einfach raus damit."></textarea>
+    <div class="thought-compose-footer">
+      <span class="thought-autosave" id="thoughtAutosave"></span>
+      <button class="thought-save-btn" onclick="saveThought()">+ Eintragen</button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="thought-search-row">
+    <input class="thought-search" id="thoughtSearch" placeholder="🔍 Suchen…" oninput="renderThoughts()" />
+  </div>
+
+  <!-- Entries -->
+  <div id="thoughtsList"></div>
+
+</div><!-- /thoughtsView -->
 
 <!-- ── Backlog page ── -->
 <div class="backlog-page" id="backlogView">
@@ -2273,16 +2476,18 @@
 
   // ── View switching ───────────────────────────────────────
   function switchView(v) {
-    document.getElementById('todayView').style.display   = v === 'today'   ? '' : 'none';
-    document.getElementById('statsView').style.display   = v === 'stats'   ? 'flex' : 'none';
-    document.getElementById('backlogView').style.display = v === 'backlog' ? 'flex' : 'none';
-    document.getElementById('cycleView').style.display   = v === 'cycle'   ? 'flex' : 'none';
-    ['today','stats','backlog','cycle'].forEach(id => {
+    document.getElementById('todayView').style.display      = v === 'today'    ? '' : 'none';
+    document.getElementById('statsView').style.display      = v === 'stats'    ? 'flex' : 'none';
+    document.getElementById('backlogView').style.display    = v === 'backlog'  ? 'flex' : 'none';
+    document.getElementById('cycleView').style.display      = v === 'cycle'    ? 'flex' : 'none';
+    document.getElementById('thoughtsView').style.display   = v === 'thoughts' ? 'flex' : 'none';
+    ['today','stats','backlog','cycle','thoughts'].forEach(id => {
       document.getElementById('nav-' + id).className = 'nav-btn' + (v === id ? ' active' : '');
     });
-    if (v === 'stats')  renderStats();
-    if (v === 'backlog') renderBacklog();
-    if (v === 'cycle')  { renderCycle(); renderCycleLogForm(); }
+    if (v === 'stats')    renderStats();
+    if (v === 'backlog')  renderBacklog();
+    if (v === 'cycle')    { renderCycle(); renderCycleLogForm(); }
+    if (v === 'thoughts') renderThoughts();
   }
 
   // ── Zyklus ────────────────────────────────────────────────
@@ -3303,6 +3508,69 @@
       body.innerHTML = '<div class="cal-status">Fehler beim Laden — <button class="cal-icon-btn" onclick="toggleCalSettings()">URL prüfen ⚙</button></div>';
     }
   }
+
+  // ── Thoughts ─────────────────────────────────────────────
+  function loadThoughts() { return JSON.parse(localStorage.getItem('ht_thoughts') || '[]'); }
+  function saveThoughts(arr) { localStorage.setItem('ht_thoughts', JSON.stringify(arr)); }
+
+  function saveThought() {
+    const text = document.getElementById('thoughtText').value.trim();
+    if (!text) return;
+    const mood = document.getElementById('thoughtMood').value;
+    const tag  = document.getElementById('thoughtTag').value;
+    const thoughts = loadThoughts();
+    thoughts.unshift({ id: uid(), text, mood, tag, date: new Date().toISOString() });
+    saveThoughts(thoughts);
+    document.getElementById('thoughtText').value = '';
+    document.getElementById('thoughtMood').value = '';
+    document.getElementById('thoughtTag').value  = '';
+    renderThoughts();
+  }
+
+  function deleteThought(id) {
+    saveThoughts(loadThoughts().filter(t => t.id !== id));
+    renderThoughts();
+  }
+
+  function renderThoughts() {
+    const list = document.getElementById('thoughtsList');
+    if (!list) return;
+    const query = (document.getElementById('thoughtSearch')?.value || '').toLowerCase();
+    let thoughts = loadThoughts();
+    if (query) thoughts = thoughts.filter(t =>
+      t.text.toLowerCase().includes(query) ||
+      (t.tag || '').toLowerCase().includes(query) ||
+      (t.mood || '').toLowerCase().includes(query)
+    );
+    if (!thoughts.length) {
+      list.innerHTML = '<div class="thought-empty">' + (query ? 'Keine Einträge gefunden.' : 'Noch keine Gedanken eingetragen.<br>Du kannst alles hier lassen — kein Urteil. 🤍') + '</div>';
+      return;
+    }
+    list.innerHTML = '';
+    thoughts.forEach(function(t) {
+      const d = new Date(t.date);
+      const dateStr = d.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+      const timeStr = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+      const div = document.createElement('div');
+      div.className = 'thought-entry';
+      div.innerHTML =
+        '<div class="thought-entry-header">' +
+          (t.mood ? '<span class="thought-entry-mood">' + t.mood + '</span>' : '') +
+          '<div class="thought-entry-meta">' +
+            '<span class="thought-entry-date">' + dateStr + ' · ' + timeStr + '</span>' +
+            (t.tag ? '<span class="thought-entry-tag">' + escHtml(t.tag) + '</span>' : '') +
+          '</div>' +
+          '<button type="button" class="thought-entry-delete" onclick="deleteThought(\'' + t.id + '\')">✕</button>' +
+        '</div>' +
+        '<div class="thought-entry-text">' + escHtml(t.text) + '</div>';
+      list.appendChild(div);
+    });
+  }
+
+  // Enter in thought textarea — Shift+Enter = newline, Cmd/Ctrl+Enter = save
+  document.getElementById('thoughtText').addEventListener('keydown', function(e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); saveThought(); }
+  });
 
   // ── Init ─────────────────────────────────────────────────
   render();
