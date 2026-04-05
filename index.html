@@ -760,7 +760,16 @@
     .cycle-mood-btn:hover { background: var(--surface2); border-color: var(--border); }
     .cycle-mood-btn.active { background: var(--accent-light); border-color: var(--accent); }
     .cycle-mood-btn.active .mood-label { color: var(--accent); }
-    .cycle-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .cycle-chip-groups { display: flex; flex-direction: column; gap: 10px; }
+    .chip-group { display: flex; flex-direction: column; gap: 6px; }
+    .chip-group-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .cycle-chips { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
     .cycle-chip {
       display: -webkit-flex;
       display: flex;
@@ -809,18 +818,22 @@
       flex-wrap: wrap;
     }
     .cycle-period-start-btn {
-      background: none;
-      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #fee2e2;
+      border: 1.5px solid #fca5a5;
+      border-radius: 99px;
       font-family: inherit;
       font-size: 0.78rem;
-      color: var(--text-muted);
+      color: #991b1b;
       cursor: pointer;
-      padding: 4px 0;
-      text-decoration: underline;
-      text-decoration-color: var(--border);
-      transition: color 0.15s;
+      padding: 5px 11px;
+      font-weight: 500;
+      transition: all 0.15s;
+      white-space: nowrap;
     }
-    .cycle-period-start-btn:hover { color: #991b1b; }
+    .cycle-period-start-btn:hover { background: #fecaca; }
 
     /* ── Cycle Journal ── */
     .cycle-journal-entry {
@@ -1632,25 +1645,50 @@
         <button type="button" class="cycle-mood-btn" id="cmood-aengstlich"   onclick="cycleMoodClick('aengstlich')">   <span class="mood-emoji">😰</span><span class="mood-label">Ängstlich</span></button>
       </div>
       <div class="cycle-sublabel">Symptome &amp; Körper</div>
-      <div class="cycle-chips" id="cycleChips">
-        <button type="button" class="cycle-chip" id="cchip-starke_blutung"  onclick="cycleChipClick('starke_blutung')"> <span class="chip-emoji">🩸</span>Stärkere Blutung</button>
-        <button type="button" class="cycle-chip" id="cchip-wenig_blutung"   onclick="cycleChipClick('wenig_blutung')">  <span class="chip-emoji">🩸</span>Weniger Blutung</button>
-        <button type="button" class="cycle-chip" id="cchip-brustschmerzen"  onclick="cycleChipClick('brustschmerzen')"> <span class="chip-emoji">🫀</span>Brustschmerzen</button>
-        <button type="button" class="cycle-chip" id="cchip-kraempfe"        onclick="cycleChipClick('kraempfe')">       <span class="chip-emoji">🤕</span>Krämpfe</button>
-        <button type="button" class="cycle-chip" id="cchip-kopfschmerzen"   onclick="cycleChipClick('kopfschmerzen')">  <span class="chip-emoji">🤯</span>Kopfschmerzen</button>
-        <button type="button" class="cycle-chip" id="cchip-heisshunger"     onclick="cycleChipClick('heisshunger')">    <span class="chip-emoji">🍫</span>Heißhunger</button>
-        <button type="button" class="cycle-chip" id="cchip-mehr_hunger"     onclick="cycleChipClick('mehr_hunger')">    <span class="chip-emoji">🍽️</span>Mehr Hunger / wenig Sättigung</button>
-        <button type="button" class="cycle-chip" id="cchip-energielos"      onclick="cycleChipClick('energielos')">     <span class="chip-emoji">🔋</span>Energielos</button>
-        <button type="button" class="cycle-chip" id="cchip-energie"         onclick="cycleChipClick('energie')">        <span class="chip-emoji">✨</span>Voller Energie</button>
-        <button type="button" class="cycle-chip" id="cchip-hautprobleme"    onclick="cycleChipClick('hautprobleme')">   <span class="chip-emoji">😶</span>Hautprobleme</button>
-        <button type="button" class="cycle-chip" id="cchip-hitze"           onclick="cycleChipClick('hitze')">          <span class="chip-emoji">🥵</span>Hitze / Wärme</button>
-        <button type="button" class="cycle-chip" id="cchip-unterleib"       onclick="cycleChipClick('unterleib')">      <span class="chip-emoji">🫃</span>Unterleibsschmerzen</button>
-        <button type="button" class="cycle-chip" id="cchip-durchfall"       onclick="cycleChipClick('durchfall')">      <span class="chip-emoji">🚽</span>Durchfall</button>
+      <div id="cycleChips" class="cycle-chip-groups">
+
+        <div class="chip-group">
+          <div class="chip-group-label">🩸 Periode</div>
+          <div class="cycle-chips">
+            <button type="button" class="cycle-chip period-trigger" id="cchip-starke_blutung" onclick="cycleChipClick('starke_blutung')"><span class="chip-emoji">🩸</span>Stärkere Blutung</button>
+            <button type="button" class="cycle-chip period-trigger" id="cchip-wenig_blutung"  onclick="cycleChipClick('wenig_blutung')"> <span class="chip-emoji">🩸</span>Weniger Blutung</button>
+            <button class="cycle-period-start-btn" id="periodStartBtn" onclick="setPeriodStartDate()">🩸 Neue Periode beginnt heute</button>
+          </div>
+        </div>
+
+        <div class="chip-group">
+          <div class="chip-group-label">🤕 Schmerzen</div>
+          <div class="cycle-chips">
+            <button type="button" class="cycle-chip" id="cchip-unterleib"      onclick="cycleChipClick('unterleib')">     <span class="chip-emoji">🫃</span>Unterleibsschmerzen</button>
+            <button type="button" class="cycle-chip" id="cchip-kraempfe"       onclick="cycleChipClick('kraempfe')">      <span class="chip-emoji">🤕</span>Krämpfe</button>
+            <button type="button" class="cycle-chip" id="cchip-brustschmerzen" onclick="cycleChipClick('brustschmerzen')"><span class="chip-emoji">🫀</span>Brustschmerzen</button>
+            <button type="button" class="cycle-chip" id="cchip-kopfschmerzen"  onclick="cycleChipClick('kopfschmerzen')"> <span class="chip-emoji">🤯</span>Kopfschmerzen</button>
+          </div>
+        </div>
+
+        <div class="chip-group">
+          <div class="chip-group-label">🍽️ Hunger &amp; Verdauung</div>
+          <div class="cycle-chips">
+            <button type="button" class="cycle-chip" id="cchip-heisshunger" onclick="cycleChipClick('heisshunger')"><span class="chip-emoji">🍫</span>Heißhunger</button>
+            <button type="button" class="cycle-chip" id="cchip-mehr_hunger" onclick="cycleChipClick('mehr_hunger')"><span class="chip-emoji">🍽️</span>Mehr Hunger</button>
+            <button type="button" class="cycle-chip" id="cchip-durchfall"   onclick="cycleChipClick('durchfall')">  <span class="chip-emoji">🚽</span>Durchfall</button>
+          </div>
+        </div>
+
+        <div class="chip-group">
+          <div class="chip-group-label">⚡ Energie &amp; Körper</div>
+          <div class="cycle-chips">
+            <button type="button" class="cycle-chip" id="cchip-energielos"   onclick="cycleChipClick('energielos')">  <span class="chip-emoji">🔋</span>Energielos</button>
+            <button type="button" class="cycle-chip" id="cchip-energie"      onclick="cycleChipClick('energie')">     <span class="chip-emoji">✨</span>Voller Energie</button>
+            <button type="button" class="cycle-chip" id="cchip-hitze"        onclick="cycleChipClick('hitze')">       <span class="chip-emoji">🥵</span>Hitze / Wärme</button>
+            <button type="button" class="cycle-chip" id="cchip-hautprobleme" onclick="cycleChipClick('hautprobleme')"><span class="chip-emoji">😶</span>Hautprobleme</button>
+          </div>
+        </div>
+
       </div>
       <div class="cycle-sublabel">Wie geht's dir? Was nimmst du wahr?</div>
       <textarea class="cycle-note-input" id="cycleNoteInput" placeholder="Gedanken, Gefühle, körperliche Wahrnehmungen — alles was du festhalten möchtest…"></textarea>
       <div class="cycle-log-footer">
-        <button class="cycle-period-start-btn" id="periodStartBtn" onclick="setPeriodStartDate()">🩸 Neue Periode beginnt heute</button>
         <button class="cycle-save-btn" onclick="saveCycleLogEntry()">Speichern</button>
       </div>
     </div>
