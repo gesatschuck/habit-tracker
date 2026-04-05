@@ -1318,20 +1318,52 @@
       padding: 10px 20px 14px;
       border-top: 1px solid var(--border);
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
+      flex-direction: column;
+      gap: 6px;
     }
     .cal-settings-label {
-      width: 100%;
       font-size: 0.75rem;
       color: var(--text-muted);
       font-weight: 300;
-      margin-bottom: 2px;
     }
+    .cal-url-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      background: var(--surface2);
+      border-radius: 8px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    .cal-url-item-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .cal-url-item span {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .cal-url-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      padding: 0 2px;
+      line-height: 1;
+      font-family: inherit;
+      flex-shrink: 0;
+    }
+    .cal-url-remove:hover { color: #c0392b; }
+    .cal-add-row { display: flex; gap: 6px; margin-top: 2px; }
     .cal-url-input {
       flex: 1;
-      min-width: 180px;
+      min-width: 0;
       background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
@@ -1406,9 +1438,12 @@
   </div>
   <div id="calBody"><div class="cal-status">Wird geladen…</div></div>
   <div class="cal-settings" id="calSettings" style="display:none">
-    <div class="cal-settings-label">iCloud / Outlook ICS-Feed-URL (webcal:// oder https://)</div>
-    <input class="cal-url-input" id="calUrlInput" placeholder="webcal://p169-caldav.icloud.com/published/2/…" />
-    <button class="cal-save-btn" onclick="saveCalUrl()">Speichern</button>
+    <div class="cal-settings-label">Verbundene Kalender</div>
+    <div id="calUrlList"></div>
+    <div class="cal-add-row">
+      <input class="cal-url-input" id="calUrlInput" placeholder="webcal://… neue URL hinzufügen" />
+      <button class="cal-save-btn" onclick="addCalUrl()">+</button>
+    </div>
   </div>
 </div>
 
@@ -2948,8 +2983,39 @@
   // ── Calendar ─────────────────────────────────────────────
   const CORS_PROXY = 'https://corsproxy.io/?url=';
 
-  function calUrl() {
-    return localStorage.getItem('ht_cal_url') || '';
+  const DEFAULT_CAL_URLS = [
+    'webcal://p169-caldav.icloud.com/published/2/NDA1MDg3MjkwNDA1MDg3Mjjmjd3ooRkqcnut415n_NzTvc0zuMB9ws_G10TP5VTo',
+    'webcal://p169-caldav.icloud.com/published/2/NDA1MDg3MjkwNDA1MDg3Mjjmjd3ooRkqcnut415n_Nx7i-wkgJyEMru0T8GKR6B4kXK__lFEow0xJcoExQd_7pmtFz23HovpGqX_DLAjNvY'
+  ];
+
+  function loadCalUrls() {
+    const stored = localStorage.getItem('ht_cal_urls');
+    if (stored) return JSON.parse(stored);
+    // migrate old single URL
+    const old = localStorage.getItem('ht_cal_url');
+    if (old) return [old];
+    return DEFAULT_CAL_URLS.slice();
+  }
+
+  function saveCalUrls(urls) {
+    localStorage.setItem('ht_cal_urls', JSON.stringify(urls));
+  }
+
+  function renderCalUrlList() {
+    const urls = loadCalUrls();
+    const list = document.getElementById('calUrlList');
+    if (!urls.length) {
+      list.innerHTML = '<div style="font-size:0.75rem;color:var(--text-muted);font-weight:300">Keine Kalender verbunden</div>';
+      return;
+    }
+    list.innerHTML = urls.map(function(url, i) {
+      const label = url.replace(/^webcal:\/\//i,'').replace(/^https:\/\//i,'').split('/').slice(0,3).join('/');
+      return '<div class="cal-url-item">'
+        + '<div class="cal-url-item-dot"></div>'
+        + '<span title="' + url + '">' + label + '</span>'
+        + '<button type="button" class="cal-url-remove" onclick="removeCalUrl(' + i + ')">✕</button>'
+        + '</div>';
+    }).join('');
   }
 
   function toggleCalSettings() {
@@ -2957,23 +3023,32 @@
     const isOpen = el.style.display !== 'none';
     el.style.display = isOpen ? 'none' : '';
     if (!isOpen) {
-      const inp = document.getElementById('calUrlInput');
-      inp.value = calUrl();
-      inp.focus();
+      renderCalUrlList();
+      document.getElementById('calUrlInput').value = '';
+      document.getElementById('calUrlInput').focus();
     }
   }
 
-  function saveCalUrl() {
+  function addCalUrl() {
     const val = document.getElementById('calUrlInput').value.trim();
-    if (val) {
-      localStorage.setItem('ht_cal_url', val);
-      document.getElementById('calSettings').style.display = 'none';
-      fetchCalendar();
-    }
+    if (!val) return;
+    const urls = loadCalUrls();
+    if (!urls.includes(val)) { urls.push(val); saveCalUrls(urls); }
+    document.getElementById('calUrlInput').value = '';
+    renderCalUrlList();
+    fetchCalendar();
   }
 
-  document.getElementById('calUrlInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') saveCalUrl();
+  function removeCalUrl(idx) {
+    const urls = loadCalUrls();
+    urls.splice(idx, 1);
+    saveCalUrls(urls);
+    renderCalUrlList();
+    fetchCalendar();
+  }
+
+  document.getElementById('calUrlInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') addCalUrl();
   });
 
   function unfoldICS(text) {
@@ -3064,21 +3139,29 @@
   }
 
   async function fetchCalendar() {
-    const url = calUrl();
-    if (!url) {
-      document.getElementById('calBody').innerHTML = '<div class="cal-status">Kein Kalender verbunden — ⚙ klicken zum Einrichten</div>';
+    const urls = loadCalUrls();
+    const body = document.getElementById('calBody');
+    if (!urls.length) {
+      body.innerHTML = '<div class="cal-status">Kein Kalender verbunden — ⚙ klicken zum Einrichten</div>';
       return;
     }
-    document.getElementById('calBody').innerHTML = '<div class="cal-status">Wird geladen…</div>';
-    const httpsUrl = url.replace(/^webcal:\/\//i, 'https://');
+    body.innerHTML = '<div class="cal-status">Wird geladen…</div>';
     try {
-      const res = await fetch(CORS_PROXY + encodeURIComponent(httpsUrl));
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const text = await res.text();
-      const events = parseICS(text);
-      renderCalEvents(events);
+      const results = await Promise.allSettled(urls.map(async function(url) {
+        const httpsUrl = url.replace(/^webcal:\/\//i, 'https://');
+        const res = await fetch(CORS_PROXY + encodeURIComponent(httpsUrl));
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const text = await res.text();
+        return parseICS(text);
+      }));
+      const allEvents = [];
+      results.forEach(function(r) { if (r.status === 'fulfilled') allEvents.push.apply(allEvents, r.value); });
+      if (!allEvents.length && results.every(function(r) { return r.status === 'rejected'; })) {
+        throw new Error('all failed');
+      }
+      renderCalEvents(allEvents);
     } catch (e) {
-      document.getElementById('calBody').innerHTML = `<div class="cal-status">Fehler beim Laden — <button class="cal-icon-btn" onclick="toggleCalSettings()">URL prüfen ⚙</button></div>`;
+      body.innerHTML = '<div class="cal-status">Fehler beim Laden — <button class="cal-icon-btn" onclick="toggleCalSettings()">URL prüfen ⚙</button></div>';
     }
   }
 
