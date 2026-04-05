@@ -4,7 +4,7 @@
     {
       "name": "habit-tracker",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "--bind", "127.0.0.1", "--directory", "/Users/gesa/Desktop/GitHub/habit-tracker"],
+      "runtimeArgs": ["-c", "import os,http.server,functools; port=int(os.environ.get('PORT',5500)); handler=functools.partial(http.server.SimpleHTTPRequestHandler,directory='/Users/gesa/Desktop/GitHub/habit-tracker'); httpd=http.server.HTTPServer(('127.0.0.1',port),handler); httpd.serve_forever()"],
       "port": 5500,
       "autoPort": true
     }
