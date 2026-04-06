@@ -1856,9 +1856,9 @@
         <div class="chip-group">
           <div class="chip-group-label">🍽️ Hunger &amp; Verdauung</div>
           <div class="cycle-chips">
-            <button type="button" class="cycle-chip" id="cchip-heisshunger" onclick="cycleChipClick('heisshunger')"><span class="chip-emoji">🍫</span>Heißhunger</button>
-            <button type="button" class="cycle-chip" id="cchip-mehr_hunger" onclick="cycleChipClick('mehr_hunger')"><span class="chip-emoji">🍽️</span>Mehr Hunger</button>
-            <button type="button" class="cycle-chip" id="cchip-durchfall"   onclick="cycleChipClick('durchfall')">  <span class="chip-emoji">🚽</span>Durchfall</button>
+            <button type="button" class="cycle-chip" id="cchip-mehr_hunger"  onclick="cycleChipClick('mehr_hunger')"> <span class="chip-emoji">🍽️</span>Mehr Hunger</button>
+            <button type="button" class="cycle-chip" id="cchip-wenig_saett" onclick="cycleChipClick('wenig_saett')"><span class="chip-emoji">🫙</span>Wenig Sättigung</button>
+            <button type="button" class="cycle-chip" id="cchip-verdauung"   onclick="cycleChipClick('verdauung')">  <span class="chip-emoji">🚽</span>Verdauung</button>
           </div>
         </div>
 
@@ -1867,8 +1867,7 @@
           <div class="cycle-chips">
             <button type="button" class="cycle-chip" id="cchip-energielos"   onclick="cycleChipClick('energielos')">  <span class="chip-emoji">🔋</span>Energielos</button>
             <button type="button" class="cycle-chip" id="cchip-energie"      onclick="cycleChipClick('energie')">     <span class="chip-emoji">✨</span>Voller Energie</button>
-            <button type="button" class="cycle-chip" id="cchip-hitze"        onclick="cycleChipClick('hitze')">       <span class="chip-emoji">🥵</span>Hitze / Wärme</button>
-            <button type="button" class="cycle-chip" id="cchip-hautprobleme" onclick="cycleChipClick('hautprobleme')"><span class="chip-emoji">😶</span>Hautprobleme</button>
+            <button type="button" class="cycle-chip" id="cchip-hitze"        onclick="cycleChipClick('hitze')">       <span class="chip-emoji">🥵</span>Hitze</button>
           </div>
         </div>
 
@@ -2919,14 +2918,13 @@
     { key: 'starke_blutung', emoji: '🩸', label: 'Stärkere Blutung', period: true  },
     { key: 'wenig_blutung',  emoji: '🩸', label: 'Weniger Blutung',  period: true  },
     { key: 'brustschmerzen', emoji: '🫀', label: 'Brustschmerzen', period: false },
-    { key: 'heisshunger',    emoji: '🍫', label: 'Heißhunger',           period: false },
-    { key: 'mehr_hunger',    emoji: '🍽️', label: 'Mehr Hunger / wenig Sättigung', period: false },
+    { key: 'mehr_hunger',    emoji: '🍽️', label: 'Mehr Hunger',          period: false },
+    { key: 'wenig_saett',   emoji: '🫙',  label: 'Wenig Sättigung',      period: false },
     { key: 'energielos',     emoji: '🔋', label: 'Energielos',     period: false },
     { key: 'energie',        emoji: '✨', label: 'Voller Energie', period: false },
-    { key: 'hautprobleme',   emoji: '😶', label: 'Hautprobleme',   period: false },
-    { key: 'hitze',          emoji: '🥵', label: 'Hitze / Wärme',       period: false },
+    { key: 'hitze',          emoji: '🥵', label: 'Hitze',                period: false },
     { key: 'unterleib',      emoji: '🫃', label: 'Unterleibsschmerzen', period: false },
-    { key: 'durchfall',      emoji: '🚽', label: 'Durchfall',           period: false },
+    { key: 'verdauung',      emoji: '🚽', label: 'Verdauung',            period: false },
   ];
 
   let cycleLogDate = TODAY_KEY();
