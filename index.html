@@ -1656,7 +1656,7 @@
     <div id="calUrlList"></div>
     <div class="cal-add-row">
       <input class="cal-url-input" id="calUrlInput" placeholder="webcal://… neue URL hinzufügen" />
-      <button class="cal-save-btn" onclick="addCalUrl()">+</button>
+      <button type="button" class="cal-save-btn" onclick="addCalUrl()">+</button>
     </div>
   </div>
 </div>
@@ -3373,10 +3373,23 @@
   }
 
   function addCalUrl() {
-    const val = document.getElementById('calUrlInput').value.trim();
+    let val = document.getElementById('calUrlInput').value.trim();
     if (!val) return;
+    // accept https:// links too — convert to webcal://
+    val = val.replace(/^https:\/\//i, 'webcal://');
+    // must start with webcal:// or https://
+    if (!/^webcal:\/\//i.test(val)) {
+      alert('Bitte eine webcal:// URL eingeben.');
+      return;
+    }
     const urls = loadCalUrls();
-    if (!urls.includes(val)) { urls.push(val); saveCalUrls(urls); }
+    if (urls.includes(val)) {
+      alert('Dieser Kalender ist bereits verbunden.');
+      document.getElementById('calUrlInput').value = '';
+      return;
+    }
+    urls.push(val);
+    saveCalUrls(urls);
     document.getElementById('calUrlInput').value = '';
     renderCalUrlList();
     fetchCalendar();
